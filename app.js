@@ -1,19 +1,20 @@
 const express = require('express');
 const axios = require('axios');
+require("dotenv").config();
 
 const app = express();
+const port = process.env.PORT || 3000;
 
 const config = {
   client: {
-    id: "",
-    secret: "",
-    redirect_url: "http://localhost:3000",
-    state: "rand_string_123"
+    id: process.env.CLIENT_ID,
+    secret: process.env.CLIENT_SECRET,
+    redirect_url: process.env.REDIRECT_URL
   },
   auth: {
-    tokenHost: 'https://your-project.authgearapps.com',
+    tokenHost: process.env.AUTHGEAR_ENDPOINT,
     tokenPath: '/oauth2/token',
-    authorizePath: '/oauth2/authorize',
+    authorizePath: '/oauth2/authorize'
   },
 };
 
@@ -27,8 +28,7 @@ app.get("/", async (req, res) => {
       grant_type: 'authorization_code',
       response_type: 'code',
       redirect_uri: config.client.redirect_url,
-      scope: "openid",
-      state: config.client.state
+      scope: "openid"
     };
 
     try {
@@ -37,7 +37,6 @@ app.get("/", async (req, res) => {
       });
 
       const accessToken = getToken.data.access_token;
-      console.log(accessToken);
 
       //Now use access token to get user info.
       const getUserInfo = await axios.get(`${config.auth.tokenHost}/oauth2/userinfo`, { headers: { "Authorization": "Bearer " + accessToken } });
@@ -46,12 +45,14 @@ app.get("/", async (req, res) => {
         <div style="max-width: 650px; margin: 16px auto; background-color: #EDEDED; padding: 16px;">
           <p>Welcome ${userInfo.email}</p>
           <p>This demo app shows you how to add user authentication to your Express app using Authgear</p>
+          <div>
+            <pre>${JSON.stringify(userInfo, null, 2)}</pre>
+          </div>
             <p>Checkout <a href="https://docs.authgear.com">docs.authgear.com</a> to learn more about adding Authgear to your apps.</p>
           
         </div>
     `);
     } catch (error) {
-      console.log(error);
       res.send("An error occoured! Login could not complete. Error data: " + error);
     }
   }
@@ -69,10 +70,10 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.redirect(`${config.auth.tokenHost}${config.auth.authorizePath}/?client_id=${config.client.id}&redirect_uri=${config.client.redirect_url}&state=${config.client.state}&response_type=code&scope=openid`);
+  res.redirect(`${config.auth.tokenHost}${config.auth.authorizePath}/?client_id=${config.client.id}&redirect_uri=${config.client.redirect_url}&response_type=code&scope=openid`);
 });
 
-app.listen(3000, () => {
-  console.log("server started!");
+app.listen(port, () => {
+  console.log(`server started on port ${port}!`);
 });
 

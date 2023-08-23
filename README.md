@@ -10,3 +10,19 @@ Before you run this project on your local machine, sign up for a free Authgear a
 
 For a more detailed step-by-step guild on how to use Authgear with Express, check out this post:
 [https://docs.authgear.com/get-started/regular-web-app](https://docs.authgear.com/get-started/regular-web-app)
+
+### Fill in the enviroment variables
+
+Create `.env` file according to `.env_template` and fill in the configuration with info obtained from the Authgear Portal.
+
+### Install dependency
+
+```
+yarn
+```
+
+### Start the server
+
+```
+yarn start
+```
