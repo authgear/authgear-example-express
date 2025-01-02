@@ -18,11 +18,11 @@ Create `.env` file according to `.env_template` and fill in the configuration wi
 ### Install dependency
 
 ```
-yarn
+npm install
 ```
 
 ### Start the server
 
 ```
-yarn start
+npm run dev
 ```
