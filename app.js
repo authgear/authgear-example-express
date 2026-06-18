@@ -1,7 +1,7 @@
 const express = require('express');
 const axios = require("axios");
 const session = require("express-session");
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -9,6 +9,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   session({
     secret: "your_strong_secret_key", // Replace with a strong, randomly generated secret
+    resave: false,
+    saveUninitialized: false,
     cookie: {},
   })
 );
@@ -91,7 +93,7 @@ app.get("/login", async(req, res) => {
   authorizedUrl.searchParams.set('redirect_uri', process.env.AUTHGEAR_REDIRECT_URL);
   authorizedUrl.searchParams.set('response_type', 'code');
   authorizedUrl.searchParams.set('scope', scopes);
-  res.redirect(authorizedUrl);
+  res.redirect(authorizedUrl.toString());
 });
 
 app.get("/auth-redirect", async(req, res) => {
@@ -138,7 +140,7 @@ app.get("/logout", async (req, res) => {
   req.session.destroy();
   
   res.set("Authorization", "Bearer " + accessToken);
-  res.redirect(endSessionUrl);
+  res.redirect(endSessionUrl.toString());
 });
 
 app.listen(port, () => {
