@@ -118,6 +118,7 @@ app.get("/auth-redirect", async(req, res) => {
       req.session.access_token = accessToken;
       req.session.expire_at = new Date(Date.now()).getTime() + getToken.data.expires_in * 1000;
       req.session.refresh_token = getToken.data.refresh_token;
+      req.session.id_token = getToken.data.id_token;
       res.redirect("/");
 
     } catch (error) {
@@ -129,17 +130,24 @@ app.get("/auth-redirect", async(req, res) => {
 });
 
 app.get("/logout", async (req, res) => {
-  const accessToken = req.session.access_token;
+  const idToken = req.session.id_token;
   const endSessionUrl = new URL(
     "/oauth2/end_session",
     process.env.AUTHGEAR_ENDPOINT
   );
-  endSessionUrl.searchParams.set("post_logout_redirect_uri", "http://localhost:3000");
-  
-  // Remove access token, and refresh token from express-session
+  // id_token_hint lets Authgear identify the client/session so it will honor
+  // the post_logout_redirect_uri (which must also be registered in the portal).
+  if (idToken != null) {
+    endSessionUrl.searchParams.set("id_token_hint", idToken);
+  }
+  endSessionUrl.searchParams.set(
+    "post_logout_redirect_uri",
+    process.env.AUTHGEAR_POST_LOGOUT_REDIRECT_URL || "http://localhost:3000"
+  );
+
+  // Remove access token, refresh token, and id token from express-session
   req.session.destroy();
-  
-  res.set("Authorization", "Bearer " + accessToken);
+
   res.redirect(endSessionUrl.toString());
 });
 
